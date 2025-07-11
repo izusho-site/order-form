@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <title>職員室注文システム</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <script src="https://static.line-scdn.net/liff/edge/2.1/sdk.js"></script>
+  <style>
+    body {
+      font-family: sans-serif;
+      margin: 20px;
+    }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      width: 100%;
+      padding: 8px;
+      font-size: 1em;
+      margin-top: 5px;
+    }
+    button {
+      margin-top: 20px;
+      padding: 10px;
+      font-size: 1em;
+      background-color: #06c755;
+      color: white;
+      border: none;
+      width: 100%;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>職員室 注文フォーム</h2>
+
+  <label for="office">職員室</label>
+  <select id="office">
+    <option value="生徒指導室">生徒指導室</option>
+    <option value="商業センター">商業センター</option>
+    <option value="進路指導室">進路指導室</option>
+    <option value="事務室">事務室</option>
+  </select>
+
+  <label for="item">商品名</label>
+  <select id="item">
+    <option value="コーヒー">コーヒー</option>
+    <option value="紅茶">紅茶</option>
+    <option value="クッキー">クッキー</option>
+    <option value="チョコレート">チョコレート</option>
+  </select>
+
+  <label for="quantity">数量</label>
+  <input type="number" id="quantity" min="1" value="1">
+
+  <button id="submit">注文する</button>
+
+  <script>
+    const GAS_ENDPOINT = '【ここにGASのURLを貼ってください】';
+
+    async function sendOrder(userName) {
+      const office = document.getElementById('office').value;
+      const item = document.getElementById('item').value;
+      const quantity = parseInt(document.getElementById('quantity').value, 10);
+
+      const orderData = {
+        userName,
+        office,
+        item,
+        quantity
+      };
+
+      try {
+        const res = await fetch(GAS_ENDPOINT, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(orderData)
+        });
+
+        const result = await res.json();
+        if (result.status === 'success') {
+          alert("注文を受け付けました！");
+          liff.closeWindow(); // LINE内で閉じる
+        } else {
+          alert("送信エラー：" + result.message);
+        }
+      } catch (err) {
+        alert("送信失敗：" + err.message);
+      }
+    }
+
+    document.getElementById('submit').addEventListener('click', async () => {
+      if (!liff.isLoggedIn()) {
+        liff.login();
+        return;
+      }
+
+      const profile = await liff.getProfile();
+      const userName = profile.displayName;
+      sendOrder(userName);
+    });
+
+    window.onload = () => {
+      liff.init({ liffId: '【ここにLIFF IDを貼ってください】' })
+        .then(() => {
+          if (!liff.isLoggedIn()) {
+            liff.login();
+          }
+        })
+        .catch(err => {
+          alert("LIFF初期化エラー：" + err.message);
+        });
+    };
+  </script>
+</body>
+</html>
