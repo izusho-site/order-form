@@ -57,7 +57,7 @@
   <button id="submit">注文する</button>
 
   <script>
-    const GAS_ENDPOINT = '【ここにGASのURLを貼ってください】';
+    const GAS_ENDPOINT = 'https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbxsNG-3hRSIwQRT2aRstQfabQrT-0nd3OlJsHMNEIVbDp-j8VK78QFAMuF7JkR2PbJr/exec';
 
     async function sendOrder(userName) {
       const office = document.getElementById('office').value;
@@ -102,7 +102,7 @@
     });
 
     window.onload = () => {
-      liff.init({ liffId: '【ここにLIFF IDを貼ってください】' })
+      liff.init({ liffId: '2007744970-eJD0RJlJ' })
         .then(() => {
           if (!liff.isLoggedIn()) {
             liff.login();
