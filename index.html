@@ -57,12 +57,19 @@
   <button id="submit">注文する</button>
 
   <script>
+    // ▼ ここにGASのWebアプリURL（exec形式）を設定
     const GAS_ENDPOINT = 'https://script.google.com/a/macros/ict.shimanet.ed.jp/s/AKfycbxsNG-3hRSIwQRT2aRstQfabQrT-0nd3OlJsHMNEIVbDp-j8VK78QFAMuF7JkR2PbJr/exec';
 
+    // 注文データを送信
     async function sendOrder(userName) {
       const office = document.getElementById('office').value;
       const item = document.getElementById('item').value;
       const quantity = parseInt(document.getElementById('quantity').value, 10);
+
+      if (!quantity || quantity <= 0) {
+        alert("数量は1以上を入力してください");
+        return;
+      }
 
       const orderData = {
         userName,
@@ -79,30 +86,38 @@
         });
 
         const result = await res.json();
+
         if (result.status === 'success') {
           alert("注文を受け付けました！");
-          liff.closeWindow(); // LINE内で閉じる
+          liff.closeWindow(); // LINEブラウザを閉じる
         } else {
           alert("送信エラー：" + result.message);
         }
       } catch (err) {
         alert("送信失敗：" + err.message);
+        console.error(err);
       }
     }
 
+    // ボタンがクリックされたときの処理
     document.getElementById('submit').addEventListener('click', async () => {
-      if (!liff.isLoggedIn()) {
-        liff.login();
-        return;
-      }
+      try {
+        if (!liff.isLoggedIn()) {
+          liff.login();
+          return;
+        }
 
-      const profile = await liff.getProfile();
-      const userName = profile.displayName;
-      sendOrder(userName);
+        const profile = await liff.getProfile();
+        const userName = profile.displayName || '不明なユーザー';
+        sendOrder(userName);
+      } catch (err) {
+        alert("ユーザー情報取得に失敗しました: " + err.message);
+      }
     });
 
+    // LIFF初期化
     window.onload = () => {
-      liff.init({ liffId: '2007744970-eJD0RJlJ' })
+      liff.init({ liffId: '2007744970-eJD0RJlJ' }) // ← あなたのLIFF ID
         .then(() => {
           if (!liff.isLoggedIn()) {
             liff.login();
@@ -110,6 +125,7 @@
         })
         .catch(err => {
           alert("LIFF初期化エラー：" + err.message);
+          console.error(err);
         });
     };
   </script>
